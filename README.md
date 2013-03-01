@@ -28,21 +28,21 @@ will ever be connected to by the public.
 Usage
 -----
 
->    Usage: ./hircd.py [option]
->
->    Options:
->      -h, --help            show this help message and exit
->      --start               Start hircd (default)
->      --stop                Stop hircd
->      --restart             Restart hircd
->      -a LISTEN_ADDRESS, --address=LISTEN_ADDRESS
->                            IP to listen on
->      -p LISTEN_PORT, --port=LISTEN_PORT
->                            Port to listen on
->      -V, --verbose         Be verbose (show lots of output)
->      -l, --log-stdout      Also log to stdout
->      -e, --errors          Do not intercept errors.
->      -f, --foreground      Do not go into daemon mode.
+    Usage: ./hircd.py [option]
+
+    Options:
+      -h, --help            show this help message and exit
+      --start               Start hircd (default)
+      --stop                Stop hircd
+      --restart             Restart hircd
+      -a LISTEN_ADDRESS, --address=LISTEN_ADDRESS
+                            IP to listen on
+      -p LISTEN_PORT, --port=LISTEN_PORT
+                            Port to listen on
+      -V, --verbose         Be verbose (show lots of output)
+      -l, --log-stdout      Also log to stdout
+      -e, --errors          Do not intercept errors.
+      -f, --foreground      Do not go into daemon mode.
 
 Copyright
 ---------
