@@ -1,6 +1,7 @@
 hircd - Hacky IRC Daemon
 ========================
 
+
 About
 -----
 
@@ -25,6 +26,13 @@ It is mostly useful as a testing tool or perhaps for building something like a
 private proxy on. Do NOT use it in any kind of production code or anything that
 will ever be connected to by the public.
 
+Requirements
+------------
+
+*   Python (2.6+)
+*   An IRC client
+
+
 Usage
 -----
 
@@ -44,10 +52,11 @@ Usage
       -e, --errors          Do not intercept errors.
       -f, --foreground      Do not go into daemon mode.
 
+
 Copyright
 ---------
 
-hircd is Copyright by Ferry Boender, 2009 - Released under the MIT License
+hircd is Copyright by Ferry Boender, 2009-2013 - Released under the MIT License
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation
