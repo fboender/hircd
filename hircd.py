@@ -150,6 +150,7 @@ class IRCClient(SocketServer.BaseRequestHandler):
                             logging.debug('from %s: %s' % (self.client_ident(), line))
                             if ' ' in line:
                                 command, params = line.split(' ', 1)
+                                params = params.lstrip(':')
                             else:
                                 command = line
                                 params = ''
