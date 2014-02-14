@@ -406,7 +406,8 @@ class IRCClient(SocketServer.BaseRequestHandler):
                 for client in channel.clients:
                     client.send_queue.append(response)
                 channel.clients.remove(self)
-        self.server.clients.pop(self.nick)
+        if self.nick in self.server.clients:
+            self.server.clients.pop(self.nick)
         logging.info('Connection finished: %s' % (self.client_ident()))
 
     def __repr__(self):
