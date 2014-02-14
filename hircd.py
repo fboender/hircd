@@ -68,7 +68,7 @@ import select
 import re
 
 SRV_NAME    = "Hircd"
-SRV_VERSION = "0.1"
+SRV_VERSION = "0.2"
 SRV_WELCOME = "Welcome to %s v%s, the ugliest IRC server in the world." % (SRV_NAME, SRV_VERSION)
 
 RPL_WELCOME          = '001'
