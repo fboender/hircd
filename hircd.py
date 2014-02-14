@@ -328,7 +328,7 @@ class IRCClient(SocketServer.BaseRequestHandler):
 
         channel = self.server.channels.get(channel_name)
         if not channel:
-            raise IRCError(ERR_NOSUCHNICK, 'PRIVMSG :%s' % (target))
+            raise IRCError(ERR_NOSUCHNICK, 'PRIVMSG :%s' % (channel_name))
         if not channel.name in self.channels:
             # The user isn't in the channel.
             raise IRCError(ERR_CANNOTSENDTOCHAN, '%s :Cannot send to channel' % (channel.name))
