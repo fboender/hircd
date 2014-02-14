@@ -363,12 +363,7 @@ class IRCClient(SocketServer.BaseRequestHandler):
         Handle the client breaking off the connection with a QUIT command.
         """
         response = ':%s QUIT :%s' % (self.client_ident(), params.lstrip(':'))
-        # Send quit message to all clients in all channels user is in, and
-        # remove the user from the channels.
-        for channel in self.channels.values():
-            for client in channel.clients:
-                client.send_queue.append(response)
-            channel.clients.remove(self)
+        self.finish(response)
 
     def handle_dump(self, params):
         """
@@ -391,14 +386,15 @@ class IRCClient(SocketServer.BaseRequestHandler):
         """
         return('%s!%s@%s' % (self.nick, self.user, self.server.servername))
 
-    def finish(self):
+    def finish(self,response=None):
         """
         The client conection is finished. Do some cleanup to ensure that the
         client doesn't linger around in any channel or the client list, in case
         the client didn't properly close the connection with PART and QUIT.
         """
         logging.info('Client disconnected: %s' % (self.client_ident()))
-        response = ':%s QUIT :EOF from client' % (self.client_ident())
+        if response == None:
+            response = ':%s QUIT :EOF from client' % (self.client_ident())
         for channel in self.channels.values():
             if self in channel.clients:
                 # Client is gone without properly QUITing or PARTing this
