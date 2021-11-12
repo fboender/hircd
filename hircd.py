@@ -121,14 +121,14 @@ class IRCClient(socketserver.BaseRequestHandler):
         logging.info('Client connected: %s' % (self.client_ident(), ))
 
         while True:
-            buf = ''
+            buf = b''
             ready_to_read, ready_to_write, in_error = select.select([self.request], [], [], 0.1)
 
             # Write any commands to the client
             while self.send_queue:
                 msg = self.send_queue.pop(0)
                 logging.debug('to %s: %s' % (self.client_ident(), msg))
-                self.request.send(msg + '\n')
+                self.request.send(msg.encode("utf-8") + b'\n')
 
             # See if the client has any commands for us.
             if len(ready_to_read) == 1 and ready_to_read[0] == self.request:
@@ -138,11 +138,11 @@ class IRCClient(socketserver.BaseRequestHandler):
                     break
                 elif len(data) > 0:
                     # There is data. Process it and turn it into line-oriented input.
-                    buf += str(data)
+                    buf += data
 
-                    while buf.find("\n") != -1:
-                        line, buf = buf.split("\n", 1)
-                        line = line.rstrip()
+                    while buf.find(b"\n") != -1:
+                        line, buf = buf.split(b"\n", 1)
+                        line = line.rstrip().decode("utf-8", errors="replace")
 
                         response = ''
                         try:
@@ -171,7 +171,7 @@ class IRCClient(socketserver.BaseRequestHandler):
 
                         if response:
                             logging.debug('to %s: %s' % (self.client_ident(), response))
-                            self.request.send(response + '\r\n')
+                            self.request.send(response.encode("utf-8") + b'\r\n')
 
         self.request.close()
 
