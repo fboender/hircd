@@ -451,10 +451,9 @@ class Daemon:
             pid = os.fork()
             if pid > 0:
                 try:
-                    f = file('hircd.pid', 'w')
-                    f.write(str(pid))
-                    f.close()
-                except IOError as e:
+                    with open('hircd.pid', 'w') as f:
+                        f.write(str(pid))
+                except OSError as e:
                     logging.error(e)
                     sys.stderr.write(repr(e))
                 sys.exit(0) # End parent
@@ -513,14 +512,13 @@ if __name__ == "__main__":
     if options.stop or options.restart:
         pid = None
         try:
-            f = file('hircd.pid', 'r')
-            pid = int(f.readline())
-            f.close()
+            with open('hircd.pid', 'r') as f:
+                pid = int(f.readline())
             os.unlink('hircd.pid')
-        except ValueError as e:
+        except ValueError:
             sys.stderr.write('Error in pid file `hircd.pid`. Aborting\n')
             sys.exit(-1)
-        except IOError as e:
+        except OSError:
             pass
 
         if pid:
