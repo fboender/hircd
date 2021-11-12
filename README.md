@@ -29,7 +29,7 @@ will ever be connected to by the public.
 Requirements
 ------------
 
-*   Python (2.6+)
+*   Python (3.5+)
 *   An IRC client
 
 
