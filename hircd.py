@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 
 # 
 # Very simple hacky ugly IRC server.
@@ -60,7 +60,6 @@
 import sys
 import optparse
 import logging
-import ConfigParser
 import os
 import socketserver
 import socket
@@ -212,7 +211,6 @@ class IRCClient(socketserver.BaseRequestHandler):
                 message = ':%s NICK :%s' % (self.client_ident(), nick)
 
                 self.server.clients.pop(self.nick)
-                prev_nick = self.nick
                 self.nick = nick
                 self.server.clients[self.nick] = self
 
@@ -231,7 +229,7 @@ class IRCClient(socketserver.BaseRequestHandler):
         Handle the USER command which identifies the user to the server.
         """
         if params.count(' ') < 3:
-            raise IRCError(ERR_NEEDMOREPARAMS, '%s :Not enough parameters' % (USER))
+            raise IRCError(ERR_NEEDMOREPARAMS, 'USER :Not enough parameters')
 
         user, mode, unused, realname = params.split(' ', 3)
         self.user = user
