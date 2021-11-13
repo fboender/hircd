@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 
 # 
 # Very simple hacky ugly IRC server.
@@ -60,9 +60,8 @@
 import sys
 import optparse
 import logging
-import ConfigParser
 import os
-import SocketServer
+import socketserver
 import socket
 import select
 import re
@@ -101,7 +100,7 @@ class IRCChannel(object):
         self.topic = topic
         self.clients = set()
 
-class IRCClient(SocketServer.BaseRequestHandler):
+class IRCClient(socketserver.BaseRequestHandler):
     """
     IRC client connect and command handling. Client connection is handled by
     the `handle` method which sets up a two-way communication with the client.
@@ -116,20 +115,20 @@ class IRCClient(SocketServer.BaseRequestHandler):
         self.send_queue = []        # Messages to send to client (strings)
         self.channels = {}          # Channels the client is in
 
-        SocketServer.BaseRequestHandler.__init__(self, request, client_address, server)
+        socketserver.BaseRequestHandler.__init__(self, request, client_address, server)
 
     def handle(self):
         logging.info('Client connected: %s' % (self.client_ident(), ))
 
         while True:
-            buf = ''
+            buf = b''
             ready_to_read, ready_to_write, in_error = select.select([self.request], [], [], 0.1)
 
             # Write any commands to the client
             while self.send_queue:
                 msg = self.send_queue.pop(0)
                 logging.debug('to %s: %s' % (self.client_ident(), msg))
-                self.request.send(msg + '\n')
+                self.request.send(msg.encode("utf-8") + b'\n')
 
             # See if the client has any commands for us.
             if len(ready_to_read) == 1 and ready_to_read[0] == self.request:
@@ -139,11 +138,11 @@ class IRCClient(SocketServer.BaseRequestHandler):
                     break
                 elif len(data) > 0:
                     # There is data. Process it and turn it into line-oriented input.
-                    buf += str(data)
+                    buf += data
 
-                    while buf.find("\n") != -1:
-                        line, buf = buf.split("\n", 1)
-                        line = line.rstrip()
+                    while buf.find(b"\n") != -1:
+                        line, buf = buf.split(b"\n", 1)
+                        line = line.rstrip().decode("utf-8", errors="replace")
 
                         response = ''
                         try:
@@ -159,20 +158,20 @@ class IRCClient(SocketServer.BaseRequestHandler):
                                 logging.info('No handler for command: %s. Full line: %s' % (command, line))
                                 raise IRCError(ERR_UNKNOWNCOMMAND, '%s :Unknown command' % (command))
                             response = handler(params)
-                        except AttributeError, e:
+                        except AttributeError as e:
                             raise e
                             logging.error('%s' % (e))
-                        except IRCError, e:
+                        except IRCError as e:
                             response = ':%s %s %s' % (self.server.servername, e.code, e.value)
                             logging.error('%s' % (response))
-                        except Exception, e:
+                        except Exception as e:
                             response = ':%s ERROR %s' % (self.server.servername, repr(e))
                             logging.error('%s' % (response))
                             raise
 
                         if response:
                             logging.debug('to %s: %s' % (self.client_ident(), response))
-                            self.request.send(response + '\r\n')
+                            self.request.send(response.encode("utf-8") + b'\r\n')
 
         self.request.close()
 
@@ -212,13 +211,12 @@ class IRCClient(SocketServer.BaseRequestHandler):
                 message = ':%s NICK :%s' % (self.client_ident(), nick)
 
                 self.server.clients.pop(self.nick)
-                prev_nick = self.nick
                 self.nick = nick
                 self.server.clients[self.nick] = self
 
                 # Send a notification of the nick change to all the clients in
                 # the channels the client is in.
-                for channel in self.channels.values():
+                for channel in list(self.channels.values()):
                     for client in channel.clients:
                         if client != self: # do not send to client itself.
                             client.send_queue.append(message)
@@ -231,7 +229,7 @@ class IRCClient(SocketServer.BaseRequestHandler):
         Handle the USER command which identifies the user to the server.
         """
         if params.count(' ') < 3:
-            raise IRCError(ERR_NEEDMOREPARAMS, '%s :Not enough parameters' % (USER))
+            raise IRCError(ERR_NEEDMOREPARAMS, 'USER :Not enough parameters')
 
         user, mode, unused, realname = params.split(' ', 3)
         self.user = user
@@ -369,16 +367,16 @@ class IRCClient(SocketServer.BaseRequestHandler):
         """
         Dump internal server information for debugging purposes.
         """
-        print "Clients:", self.server.clients
-        for client in self.server.clients.values():
-            print " ", client
-            for channel in client.channels.values():
-                print "     ", channel.name
-        print "Channels:", self.server.channels
-        for channel in self.server.channels.values():
-            print " ", channel.name, channel
+        print("Clients:", self.server.clients)
+        for client in list(self.server.clients.values()):
+            print(" ", client)
+            for channel in list(client.channels.values()):
+                print("     ", channel.name)
+        print("Channels:", self.server.channels)
+        for channel in list(self.server.channels.values()):
+            print(" ", channel.name, channel)
             for client in channel.clients:
-                print "     ", client.nick, client
+                print("     ", client.nick, client)
 
     def client_ident(self):
         """
@@ -395,7 +393,7 @@ class IRCClient(SocketServer.BaseRequestHandler):
         logging.info('Client disconnected: %s' % (self.client_ident()))
         if response == None:
             response = ':%s QUIT :EOF from client' % (self.client_ident())
-        for channel in self.channels.values():
+        for channel in list(self.channels.values()):
             if self in channel.clients:
                 # Client is gone without properly QUITing or PARTing this
                 # channel.
@@ -419,7 +417,7 @@ class IRCClient(SocketServer.BaseRequestHandler):
             )
         )
 
-class IRCServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
+class IRCServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
     daemon_threads = True
     allow_reuse_address = True
 
@@ -427,7 +425,7 @@ class IRCServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
         self.servername = 'localhost'
         self.channels = {} # Existing channels (IRCChannel instances) by channelname
         self.clients = {}  # Connected clients (IRCClient instances) by nickname
-        SocketServer.TCPServer.__init__(self, server_address, RequestHandlerClass)
+        socketserver.TCPServer.__init__(self, server_address, RequestHandlerClass)
 
 class Daemon:
     """
@@ -440,7 +438,7 @@ class Daemon:
             pid = os.fork()
             if pid > 0:
                 sys.exit(0) # End parent
-        except OSError, e:
+        except OSError as e:
             sys.stderr.write("fork #1 failed: %d (%s)\n" % (e.errno, e.strerror))
             sys.exit(-2)
 
@@ -453,14 +451,13 @@ class Daemon:
             pid = os.fork()
             if pid > 0:
                 try:
-                    f = file('hircd.pid', 'w')
-                    f.write(str(pid))
-                    f.close()
-                except IOError, e:
+                    with open('hircd.pid', 'w') as f:
+                        f.write(str(pid))
+                except OSError as e:
                     logging.error(e)
                     sys.stderr.write(repr(e))
                 sys.exit(0) # End parent
-        except OSError, e:
+        except OSError as e:
             sys.stderr.write("fork #2 failed: %d (%s)\n" % (e.errno, e.strerror))
             sys.exit(-2)
 
@@ -515,14 +512,13 @@ if __name__ == "__main__":
     if options.stop or options.restart:
         pid = None
         try:
-            f = file('hircd.pid', 'r')
-            pid = int(f.readline())
-            f.close()
+            with open('hircd.pid', 'r') as f:
+                pid = int(f.readline())
             os.unlink('hircd.pid')
-        except ValueError, e:
+        except ValueError:
             sys.stderr.write('Error in pid file `hircd.pid`. Aborting\n')
             sys.exit(-1)
-        except IOError, e:
+        except OSError:
             pass
 
         if pid:
@@ -560,6 +556,6 @@ if __name__ == "__main__":
         ircserver = IRCServer((options.listen_address, int(options.listen_port)), IRCClient)
         logging.info('Starting hircd on %s:%s' % (options.listen_address, options.listen_port))
         ircserver.serve_forever()
-    except socket.error, e:
+    except socket.error as e:
         logging.error(repr(e))
         sys.exit(-2)
