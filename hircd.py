@@ -128,7 +128,7 @@ class IRCClient(socketserver.BaseRequestHandler):
             while self.send_queue:
                 msg = self.send_queue.pop(0)
                 logging.debug('to %s: %s' % (self.client_ident(), msg))
-                self.request.send(msg.encode("utf-8") + b'\n')
+                self.request.send(msg.encode("utf-8") + b'\r\n')
 
             # See if the client has any commands for us.
             if len(ready_to_read) == 1 and ready_to_read[0] == self.request:
