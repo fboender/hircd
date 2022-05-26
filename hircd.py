@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# 
+#
 # Very simple hacky ugly IRC server.
 #
 # Todo:
@@ -21,7 +21,7 @@
 #       File "/usr/lib/python2.6/SocketServer.py", line 322, in finish_request
 #         self.RequestHandlerClass(request, client_address, self)
 #       File "./hircd.py", line 102, in __init__
-#         
+#
 #       File "/usr/lib/python2.6/SocketServer.py", line 617, in __init__
 #         self.handle()
 #       File "./hircd.py", line 120, in handle
@@ -34,7 +34,7 @@
 # Not Todo (Won't be supported)
 #   - Server linking.
 
-# 
+#
 # Permission is hereby granted, free of charge, to any person
 # obtaining a copy of this software and associated documentation
 # files (the "Software"), to deal in the Software without
@@ -43,10 +43,10 @@
 # copies of the Software, and to permit persons to whom the
 # Software is furnished to do so, subject to the following
 # conditions:
-# 
+#
 # The above copyright notice and this permission notice shall be
 # included in all copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 # EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
 # OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -55,7 +55,7 @@
 # WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
-# 
+#
 
 import sys
 import optparse
@@ -79,6 +79,7 @@ ERR_ERRONEUSNICKNAME = '432'
 ERR_NICKNAMEINUSE    = '433'
 ERR_NEEDMOREPARAMS   = '461'
 
+
 class IRCError(Exception):
     """
     Exception thrown by IRC command handlers to notify client of a server/client error.
@@ -90,6 +91,7 @@ class IRCError(Exception):
     def __str__(self):
         return repr(self.value)
 
+
 class IRCChannel(object):
     """
     Object representing an IRC channel.
@@ -99,6 +101,7 @@ class IRCChannel(object):
         self.topic_by = 'Unknown'
         self.topic = topic
         self.clients = set()
+
 
 class IRCClient(socketserver.BaseRequestHandler):
     """
@@ -417,6 +420,7 @@ class IRCClient(socketserver.BaseRequestHandler):
             )
         )
 
+
 class IRCServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
     daemon_threads = True
     allow_reuse_address = True
@@ -426,6 +430,7 @@ class IRCServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
         self.channels = {} # Existing channels (IRCChannel instances) by channelname
         self.clients = {}  # Connected clients (IRCClient instances) by nickname
         socketserver.TCPServer.__init__(self, server_address, RequestHandlerClass)
+
 
 class Daemon:
     """
@@ -469,6 +474,7 @@ class Daemon:
             except OSError:
                 pass
 
+
 if __name__ == "__main__":
     #
     # Parameter parsing
@@ -491,7 +497,7 @@ if __name__ == "__main__":
     configfile = os.path.join(os.path.realpath(os.path.dirname(sys.argv[0])),'hircd.ini')
     logfile = os.path.join(os.path.realpath(os.path.dirname(sys.argv[0])),'hircd.log')
 
-    # 
+    #
     # Logging
     #
     if options.verbose:
