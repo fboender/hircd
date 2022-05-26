@@ -26,6 +26,11 @@ It is mostly useful as a testing tool or perhaps for building something like a
 private proxy on. Do NOT use it in any kind of production code or anything that
 will ever be connected to by the public.
 
+Hircd is included, in modified (and better maintained) form in the
+[python-irc](https://python-irc.readthedocs.io/en/latest/index.html)'s
+[`irc.server`](https://python-irc.readthedocs.io/en/latest/irc.html#module-irc.server)
+module.
+
 Requirements
 ------------
 
@@ -55,7 +60,7 @@ Usage
 Copyright
 ---------
 
-hircd is Copyright by Ferry Boender, 2009-2013 - Released under the MIT License
+hircd is Copyright by Ferry Boender, 2009-2022 - Released under the MIT License
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation
