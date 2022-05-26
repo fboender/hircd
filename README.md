@@ -49,7 +49,6 @@ Usage
                             Port to listen on
       -V, --verbose         Be verbose (show lots of output)
       -l, --log-stdout      Also log to stdout
-      -e, --errors          Do not intercept errors.
       -f, --foreground      Do not go into daemon mode.
 
 
