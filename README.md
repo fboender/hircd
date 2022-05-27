@@ -6,7 +6,7 @@ About
 -----
 
 hircd is a minimal, hacky implementation of an IRC server daemon written in
-Python in about 400 lines of code, including comments, etc.
+Python in about 600 lines of code, including comments, etc.
 
 It only has (sometimes basic) support for:
 
